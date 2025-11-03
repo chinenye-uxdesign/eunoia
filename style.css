@@ -24,7 +24,7 @@ p {
   color: #000000;
   display: block;
   text-decoration: none;
-  text-transform: uppercase;
+  text-transform: lowercase;
   font-size: 0.9rem;
   font-weight: 600;
   line-height: 0.9;
@@ -88,7 +88,7 @@ canvas {
   color: #000000;
   font-size: 4rem;
   line-height: 1;
-  background: linear-gradient(#fff, #fff) left no-repeat, #4d4d4d;
+  background: linear-gradient(#ffe279, #4a4a4a) left no-repeat, #4d4d4d;
   background-size: 0% 100%;
   background-clip: text;
   -webkit-background-clip: text;

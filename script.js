@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const config = {
-    canvasBg: "#fff7bdff",
+    canvasBg: "#fff7bd",
     modelPath: "assets/glasses.glb",
     metalness: 0.55,
     roughness: 0.75,
@@ -178,42 +178,50 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    const box = new THREE.Box3().setFromObject(model);
-    modelCenter = box.getCenter(new THREE.Vector3());
-    const size = box.getSize(new THREE.Vector3());
+      const box = new THREE.Box3().setFromObject(model);
+  const modelCenter = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z);
 
-    model.position.set(
-      -modelCenter.x + config.baseCamPosX,
-      -modelCenter.y + config.baseCamPosY,
-      -modelCenter.z + config.baseCamPosZ
-    );
+  const desiredSize = 300; // smaller number = smaller model
+  const scaleFactor = 0.5;
 
-    model.rotation.set(
-      config.baseRotationX,
-      config.baseRotationY,
-      config.baseRotationZ
-    );
+  // Apply the scale
+  model.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
-    const maxDim = Math.max(size.x, size.y, size.z);
-    camera.position.z = maxDim * config.baseZoom;
-    camera.lookAt(0, 0, 0);
+  // Apply scaled centering
+  model.position.set(
+    -modelCenter.x * scaleFactor + config.baseCamPosX,
+    -modelCenter.y * scaleFactor + config.baseCamPosY,
+    -modelCenter.z * scaleFactor + config.baseCamPosZ
+  );
 
-    scene.add(model);
-  });
+  model.rotation.set(
+    config.baseRotationX,
+    config.baseRotationY,
+    config.baseRotationZ
+  );
+
+   const scaledMaxDim = maxDim * scaleFactor;
+  camera.position.z = scaledMaxDim * 2.0; // multiplier controls "zoom out"
+  camera.lookAt(0, 0, 0);
+
+  scene.add(model);
+});
 
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 
-    config.baseCamPosX = window.innerWidth < 1000 ? 0 : -0.75;
-    if (model) {
-      model.position.set(
-        -modelCenter.x + config.baseCamPosX,
-        -modelCenter.y + config.baseCamPosY,
-        -modelCenter.z + config.baseCamPosZ
-      );
-    }
+
+
+   model.position.set(
+  -modelCenter.x * scaleFactor + config.baseCamPosX,
+  -modelCenter.y * scaleFactor + config.baseCamPosY,
+  -modelCenter.z * scaleFactor + config.baseCamPosZ
+);
+
   });
 
   let mouseX = 0;
