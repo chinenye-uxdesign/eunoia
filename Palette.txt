@@ -1,0 +1,32 @@
+/* CSS HEX */
+--old-gold: #d7b340;
+--tacha: #d9bc68;
+--english-walnut: #443628;
+--golden-dream: #eec32d;
+--potters-clay: #947135;
+--olive-green: #a9ba61;
+--sand-dune: #847562;
+--bali-hai: #93a4b7;
+--indian-khaki: #c8b891;
+
+/* SCSS HEX */
+$old-gold: #d7b340;
+$tacha: #d9bc68;
+$english-walnut: #443628;
+$golden-dream: #eec32d;
+$potters-clay: #947135;
+$olive-green: #a9ba61;
+$sand-dune: #847562;
+$bali-hai: #93a4b7;
+$indian-khaki: #c8b891;
+
+/* SCSS RGB */
+$old-gold: rgba(215,179,64,1);
+$tacha: rgba(217,188,104,1);
+$english-walnut: rgba(68,54,40,1);
+$golden-dream: rgba(238,195,45,1);
+$potters-clay: rgba(148,113,53,1);
+$olive-green: rgba(169,186,97,1);
+$sand-dune: rgba(132,117,98,1);
+$bali-hai: rgba(147,164,183,1);
+$indian-khaki: rgba(200,184,145,1);

@@ -8,7 +8,7 @@
 
 body {
   font-family: "Inter", sans-serif;
-  background-color: #FFF7CD;
+  background-color: #fff8d9;
 }
 
 h1 {
@@ -21,7 +21,7 @@ h1 {
 
 a,
 p {
-  color: #000000;
+  color: #8ba9c6;
   display: block;
   text-decoration: none;
   text-transform: lowercase;
@@ -88,7 +88,7 @@ canvas {
   color: #000000;
   font-size: 4rem;
   line-height: 1;
-  background: linear-gradient(#ffe279, #4a4a4a) left no-repeat, #4d4d4d;
+  background: linear-gradient(#000000, #96b9da) left no-repeat, #96b9da;
   background-size: 0% 100%;
   background-clip: text;
   -webkit-background-clip: text;
@@ -109,7 +109,7 @@ canvas {
 
 .hero h1 {
   width: 75%;
-  color: #000000;
+  color: #96b9da;
 }
 
 @media (max-width: 1000px) {
