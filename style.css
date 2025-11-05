@@ -34,7 +34,7 @@ section {
   position: relative;
   width: 100vw;
   height: 100svh;
-  background-color: #fff8d9;
+  background-color: #fff3be;
   color: #0d0d0d;
   overflow: hidden;
 }
@@ -44,8 +44,8 @@ section {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #0d0d0d;
-  color: #e0dfdf;
+  background-color: #fff8d9;
+  color: #8ba9c6;
   padding: 2rem;
   background-image: url(assets/e1edited.png);
   background-size: contain;
@@ -230,4 +230,16 @@ section {
     width: 100%;
   }
 }
+
+
+/* Parallax performance helpers */
+.intro,
+.outro,
+.model-container,
+.tooltips,
+.circular-mask {
+  will-change: transform, background-position, clip-path;
+  transform: translateZ(0);
+}
+
 
