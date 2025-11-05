@@ -34,7 +34,7 @@ section {
   position: relative;
   width: 100vw;
   height: 100svh;
-  background-color: #fff3be;
+  background-color: #fff8d9;
   color: #0d0d0d;
   overflow: hidden;
 }
@@ -44,7 +44,7 @@ section {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #fff8d9;
+  background-color: #fffbea;
   color: #8ba9c6;
   padding: 2rem;
   background-image: url(assets/e1edited.png);
@@ -87,7 +87,7 @@ section {
   left: 0;
   width: 150vw;
   height: 100svh;
-  color: #8ba9c6;
+  color: #fff8d9;
   transform: translateX(100%);
   z-index: 2;
 }
@@ -113,7 +113,7 @@ section {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: #ffffff;
+  background-color: #b2c6e1;
   clip-path: circle(0% at 50% 50%);
 }
 
@@ -230,16 +230,4 @@ section {
     width: 100%;
   }
 }
-
-
-/* Parallax performance helpers */
-.intro,
-.outro,
-.model-container,
-.tooltips,
-.circular-mask {
-  will-change: transform, background-position, clip-path;
-  transform: translateZ(0);
-}
-
 
