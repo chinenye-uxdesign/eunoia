@@ -1,285 +1,228 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
+import Lenis from "lenis";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const menuToggler = document.querySelector(".menu-toggler");
-  const menuOverlay = document.querySelector(".menu-overlay");
-  const menuTogglerText = menuToggler.querySelector("p");
+  gsap.registerPlugin(ScrollTrigger, SplitText);
 
-  let isMenuOpen = false;
-  let isAnimating = false;
+  const lenis = new Lenis();
+  lenis.on("scroll", ScrollTrigger.update);
+  gsap.ticker.add((time) => lenis.raf(time * 1000));
+  gsap.ticker.lagSmoothing(0);
 
-  menuToggler.addEventListener("click", () => {
-    if (isAnimating) return;
-
-    isMenuOpen = !isMenuOpen;
-    isAnimating = true;
-
-    if (isMenuOpen) {
-      gsap.to(menuOverlay, {
-        opacity: 1,
-        duration: 0.5,
-        ease: "power3.out",
-        onStart: () => {
-          menuOverlay.style.pointerEvents = "all";
-        },
-        onComplete: () => {
-          isAnimating = false;
-        },
-      });
-      menuTogglerText.textContent = "Close";
-    } else {
-      gsap.to(menuOverlay, {
-        opacity: 0,
-        duration: 0.5,
-        ease: "power3.out",
-        onComplete: () => {
-          menuOverlay.style.pointerEvents = "none";
-          isAnimating = false;
-        },
-      });
-      menuTogglerText.textContent = "Menu";
-    }
+  const header1Split = new SplitText(".header-1 h1", {
+    type: "chars",
+    charsClass: "char",
+  });
+  const titleSplits = new SplitText(".tooltip .title h2", {
+    type: "lines",
+    linesClass: "line",
+  });
+  const descriptionSplits = new SplitText(".tooltip .description p", {
+    type: "lines",
+    linesClass: "line",
   });
 
-  const menuItems = document.querySelectorAll(".menu-item a");
+  header1Split.chars.forEach(
+    (char) => (char.innerHTML = `<span>${char.innerHTML}</span>`)
+  );
+  [...titleSplits.lines, ...descriptionSplits.lines].forEach(
+    (line) => (line.innerHTML = `<span>${line.innerHTML}</span>`)
+  );
 
-  menuItems.forEach((item) => {
-    item.addEventListener("mouseenter", () => {
-      gsap.to(item, {
-        backgroundSize: "100% 100%",
-        duration: 0.75,
-        ease: "power2.out",
-        overwrite: true,
-      });
-    });
+  const animOptions = { duration: 1, ease: "power3.out", stagger: 0.025 };
+  const tooltipSelectors = [
+    {
+      trigger: 0.65,
+      elements: [
+        ".tooltip:nth-child(1) .icon ion-icon",
+        ".tooltip:nth-child(1) .title .line > span",
+        ".tooltip:nth-child(1) .description .line > span",
+      ],
+    },
+    {
+      trigger: 0.85,
+      elements: [
+        ".tooltip:nth-child(2) .icon ion-icon",
+        ".tooltip:nth-child(2) .title .line > span",
+        ".tooltip:nth-child(2) .description .line > span",
+      ],
+    },
+  ];
 
-    item.addEventListener("mouseleave", () => {
-      gsap.to(item, {
-        backgroundSize: "0% 100%",
-        duration: 0.25,
-        ease: "power2.out",
-        overwrite: true,
-      });
-    });
+  ScrollTrigger.create({
+    trigger: ".product-overview",
+    start: "75% bottom",
+    onEnter: () =>
+      gsap.to(".header-1 h1 .char > span", {
+        y: "0%",
+        duration: 1,
+        ease: "power3.out",
+        stagger: 0.025,
+      }),
+    onLeaveBack: () =>
+      gsap.to(".header-1 h1 .char > span", {
+        y: "100%",
+        duration: 1,
+        ease: "power3.out",
+        stagger: 0.025,
+      }),
   });
 
-  const config = {
-    canvasBg: "#fff7bd",
-    modelPath: "assets/glasses.glb",
-    metalness: 0.55,
-    roughness: 0.75,
-    baseZoom: 0.35,
-    baseCamPosX: window.innerWidth < 1000 ? 0 : -0.75,
-    baseCamPosY: -1.25,
-    baseCamPosZ: 0,
-    baseRotationX: 0,
-    baseRotationY: 0.3,
-    baseRotationZ: 0,
-    ambientIntensity: 0.25,
-    keyIntensity: 0.5,
-    keyPosX: 2.5,
-    keyPosY: 10,
-    keyPosZ: 10,
-    fillIntensity: 1.5,
-    fillPosX: -5,
-    fillPosY: 2.5,
-    fillPosZ: -2.5,
-    rimIntensity: 2.5,
-    rimPosX: -7.5,
-    rimPosY: 5,
-    rimPosZ: -10,
-    topIntensity: 0.5,
-    topPosX: 0,
-    topPosY: 15,
-    topPosZ: 0,
-    cursorLightEnabled: true,
-    cursorLightIntensity: 2.5,
-    cursorLightColor: 0xffffff,
-    cursorLightDistance: 7.5,
-    cursorLightDecay: 2,
-    cursorLightPosZ: 1.25,
-    cursorLightSmoothness: 0.5,
-    cursorLightScale: 1,
-    parallaxSensitivityX: 0.25,
-    parallaxSensitivityY: 0.05,
-  };
-
+  let model,
+    currentRotation = 0,
+    modelSize;
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(config.canvasBg);
-
   const camera = new THREE.PerspectiveCamera(
     60,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
   );
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 
-  const canvas = document.querySelector("canvas");
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    antialias: true,
-  });
+  renderer.setClearColor(0x000000, 0);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.outputEncoding = THREE.LinearEncoding;
+  renderer.toneMapping = THREE.NoToneMapping;
   renderer.toneMappingExposure = 1.0;
+  document.querySelector(".model-container").appendChild(renderer.domElement);
 
-  const ambientLight = new THREE.AmbientLight(
-    0xffffff,
-    config.ambientIntensity
-  );
-  scene.add(ambientLight);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.7));
 
-  const keyLight = new THREE.DirectionalLight(0xffffff, config.keyIntensity);
-  keyLight.position.set(config.keyPosX, config.keyPosY, config.keyPosZ);
-  keyLight.castShadow = true;
-  keyLight.shadow.mapSize.width = 4096;
-  keyLight.shadow.mapSize.height = 4096;
-  keyLight.shadow.camera.near = 0.1;
-  keyLight.shadow.camera.far = 100;
-  keyLight.shadow.bias = -0.00005;
-  keyLight.shadow.normalBias = 0.05;
-  scene.add(keyLight);
+  const mainLight = new THREE.DirectionalLight(0xffffff, 1.0);
+  mainLight.position.set(1, 2, 3);
+  mainLight.castShadow = true;
+  mainLight.shadow.bias = -0.001;
+  mainLight.shadow.mapSize.width = 1024;
+  mainLight.shadow.mapSize.height = 1024;
+  scene.add(mainLight);
 
-  const fillLight = new THREE.DirectionalLight(0xffffff, config.fillIntensity);
-  fillLight.position.set(config.fillPosX, config.fillPosY, config.fillPosZ);
+  const fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
+  fillLight.position.set(-2, 0, -2);
   scene.add(fillLight);
 
-  const rimLight = new THREE.DirectionalLight(0xffffff, config.rimIntensity);
-  rimLight.position.set(config.rimPosX, config.rimPosY, config.rimPosZ);
-  scene.add(rimLight);
+  function setupModel() {
+    if (!model || !modelSize) return;
 
-  const topLight = new THREE.DirectionalLight(0xffffff, config.topIntensity);
-  topLight.position.set(config.topPosX, config.topPosY, config.topPosZ);
-  scene.add(topLight);
+    const isMobile = window.innerWidth < 1000;
+    const box = new THREE.Box3().setFromObject(model);
+    const center = box.getCenter(new THREE.Vector3());
 
-  const loader = new GLTFLoader();
-  let model;
-  let modelCenter = new THREE.Vector3();
+    model.position.set(
+      isMobile ? center.x + modelSize.x * 1 : -center.x - modelSize.x * 0.4,
+      -center.y + modelSize.y * 0.085,
+      -center.z
+    );
 
-  loader.load(config.modelPath, (gltf) => {
+    model.rotation.z = isMobile ? 0 : THREE.MathUtils.degToRad(-25);
+
+    const cameraDistance = isMobile ? 2 : 1.25;
+    camera.position.set(
+      0,
+      0,
+      Math.max(modelSize.x, modelSize.y, modelSize.z) * cameraDistance
+    );
+    camera.lookAt(0, 0, 0);
+  }
+
+  new GLTFLoader().load("assets/glasses.glb", (gltf) => {
     model = gltf.scene;
 
     model.traverse((node) => {
-      if (node.isMesh) {
-        node.castShadow = true;
-        node.receiveShadow = true;
-
-        if (node.material) {
-          node.material.metalness = config.metalness;
-          node.material.roughness = config.roughness;
-          node.material.needsUpdate = true;
-        }
+      if (node.isMesh && node.material) {
+        Object.assign(node.material, {
+          metalness: 0.05,
+          roughness: 0.9,
+        });
       }
     });
 
-      const box = new THREE.Box3().setFromObject(model);
-  const modelCenter = box.getCenter(new THREE.Vector3());
-  const size = box.getSize(new THREE.Vector3());
-  const maxDim = Math.max(size.x, size.y, size.z);
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    modelSize = size;
 
-  const desiredSize = 300; // smaller number = smaller model
-  const scaleFactor = 0.5;
+    scene.add(model);
+    setupModel();
+  });
 
-  // Apply the scale
-  model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-
-  // Apply scaled centering
-  model.position.set(
-    -modelCenter.x * scaleFactor + config.baseCamPosX,
-    -modelCenter.y * scaleFactor + config.baseCamPosY,
-    -modelCenter.z * scaleFactor + config.baseCamPosZ
-  );
-
-  model.rotation.set(
-    config.baseRotationX,
-    config.baseRotationY,
-    config.baseRotationZ
-  );
-
-   const scaledMaxDim = maxDim * scaleFactor;
-  camera.position.z = scaledMaxDim * 2.0; // multiplier controls "zoom out"
-  camera.lookAt(0, 0, 0);
-
-  scene.add(model);
-});
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+  }
+  animate();
 
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-
-
-
-   model.position.set(
-  -modelCenter.x * scaleFactor + config.baseCamPosX,
-  -modelCenter.y * scaleFactor + config.baseCamPosY,
-  -modelCenter.z * scaleFactor + config.baseCamPosZ
-);
-
+    setupModel();
   });
 
-  let mouseX = 0;
-  let mouseY = 0;
-  let targetRotationX = 0;
-  let targetRotationY = 0;
-  let currentRotationX = 0;
-  let currentRotationY = 0;
+  ScrollTrigger.create({
+    trigger: ".product-overview",
+    start: "top top",
+    end: `+=${window.innerHeight * 10}px`,
+    pin: true,
+    pinSpacing: true,
+    scrub: 1,
+    onUpdate: ({ progress }) => {
+      const headerProgress = Math.max(0, Math.min(1, (progress - 0.05) / 0.3));
+      gsap.to(".header-1", {
+        xPercent:
+          progress < 0.05 ? 0 : progress > 0.35 ? -100 : -100 * headerProgress,
+      });
 
-  document.addEventListener("mousemove", (event) => {
-    mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-    mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+      const maskSize =
+        progress < 0.2
+          ? 0
+          : progress > 0.3
+          ? 100
+          : 100 * ((progress - 0.2) / 0.1);
+      gsap.to(".circular-mask", {
+        clipPath: `circle(${maskSize}% at 50% 50%)`,
+      });
+
+      const header2Progress = (progress - 0.15) / 0.35;
+      const header2XPercent =
+        progress < 0.15
+          ? 100
+          : progress > 0.5
+          ? -200
+          : 100 - 300 * header2Progress;
+      gsap.to(".header-2", { xPercent: header2XPercent });
+
+      const scaleX =
+        progress < 0.45
+          ? 0
+          : progress > 0.65
+          ? 100
+          : 100 * ((progress - 0.45) / 0.2);
+      gsap.to(".tooltip .divider", { scaleX: `${scaleX}%`, ...animOptions });
+
+      tooltipSelectors.forEach(({ trigger, elements }) => {
+        gsap.to(elements, {
+          y: progress >= trigger ? "0%" : "125%",
+          ...animOptions,
+        });
+      });
+
+      if (model && progress >= 0.05) {
+        const rotationProgress = (progress - 0.05) / 0.95;
+        const targetRotation = Math.PI * 3 * 4 * rotationProgress;
+        const rotationDiff = targetRotation - currentRotation;
+        if (Math.abs(rotationDiff) > 0.001) {
+          model.rotateOnAxis(new THREE.Vector3(0, 1, 0), rotationDiff);
+          currentRotation = targetRotation;
+        }
+      }
+    },
   });
-
-  const cursorLight = new THREE.PointLight(
-    config.cursorLightColor,
-    config.cursorLightIntensity,
-    config.cursorLightDistance,
-    config.cursorLightDecay
-  );
-  cursorLight.position.set(0, 0, config.cursorLightPosZ);
-  cursorLight.visible = config.cursorLightEnabled;
-  scene.add(cursorLight);
-
-  let cursorLightTargetX = 0;
-  let cursorLightTargetY = 0;
-
-  document.addEventListener("mousemove", (event) => {
-    mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-    mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    cursorLightTargetX = mouseX * config.cursorLightScale;
-    cursorLightTargetY = mouseY * config.cursorLightScale;
-  });
-
-  function animate() {
-    requestAnimationFrame(animate);
-
-    if (model) {
-      targetRotationY = mouseX * config.parallaxSensitivityX;
-      targetRotationX = -mouseY * config.parallaxSensitivityY;
-
-      currentRotationX += (targetRotationX - currentRotationX) * 0.05;
-      currentRotationY += (targetRotationY - currentRotationY) * 0.05;
-
-      model.rotation.x = config.baseRotationX + currentRotationX;
-      model.rotation.y = config.baseRotationY + currentRotationY;
-      model.rotation.z = config.baseRotationZ;
-    }
-
-    cursorLight.position.x +=
-      (cursorLightTargetX - cursorLight.position.x) *
-      config.cursorLightSmoothness;
-    cursorLight.position.y +=
-      (cursorLightTargetY - cursorLight.position.y) *
-      config.cursorLightSmoothness;
-
-    renderer.render(scene, camera);
-  }
-  animate();
 });
+
