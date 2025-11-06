@@ -133,7 +133,7 @@ section {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  color: #e0dfdf;
+  color: #fffbea;
 }
 
 .tooltip:nth-child(2) {
@@ -143,9 +143,9 @@ section {
 
 .tooltip .divider {
   position: relative;
-  width: 100%;
+  width: 75%;
   height: 1px;
-  background-color: #000000;
+  background-color: #ffffff;
   margin: 0.5rem 0;
   transform: scaleX(0%);
 }
@@ -164,7 +164,7 @@ section {
 }
 
 .tooltip .description {
-  color: #5f5f5f;
+  color: #fff8d9;
 }
 
 .tooltip:nth-child(2) .icon,
