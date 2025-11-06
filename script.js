@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // =========================
   const config = {
     // Scene / canvas
-    canvasBg: "#7fa4c7",
+    canvasBg: "#adb5d1",
     modelPath: "assets/glasses2.glb",
 
     // Material
