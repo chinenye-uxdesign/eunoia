@@ -35,7 +35,7 @@ section {
   width: 100vw;
   height: 100svh;
   background-color: #fff8d9;
-  color: #0d0d0d;
+  color: #b2c6e1;
   overflow: hidden;
 }
 
@@ -289,3 +289,11 @@ section:not(.parallax-gallery){ height:100svh; overflow:hidden; }
   .pg4{ grid-template-columns:repeat(2,1fr); }
   :root{ --pg-width: 560px; --pg-gap: 18px; --pg-card-h: 320px; }
 }
+
+
+
+
+
+
+
+
