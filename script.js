@@ -226,3 +226,49 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+// ===== 4-Column Smooth Parallax (Lenis + column drift) =====
+// ===== 4-Column Parallax — exact speed & size =====
+const cols = document.querySelectorAll('.parallax-gallery .pg-col');
+if (cols.length) {
+  // ❶ SPEED PROFILE (left → right). Tweak these four numbers to match perfectly.
+  const SPEEDS = [0.12, 0.24, 0.36, 0.52]; // reference-like drift
+  // ❷ INERTIA (0 = snappy, 1 = never catches up). 0.12–0.16 feels like the video.
+  const SMOOTHING = 0.14;
+
+  // Reuse Lenis if present, else init once
+  let lenis = window.__lenis;
+  if (!lenis) {
+    const { default: Lenis } = await import('lenis');
+    lenis = new Lenis({ smoothWheel:true, duration:1.1, lerp:0.1 });
+    window.__lenis = lenis;
+  }
+
+  // Fade cards in when they enter
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('is-inview'); });
+  }, { rootMargin:'0px 0px -15% 0px', threshold:0.01 });
+  document.querySelectorAll('.pg-card').forEach(c=>io.observe(c));
+
+  // Parallax by column
+  const colState = new Map();
+  cols.forEach((c,i)=>{ c.dataset.speed = SPEEDS[Math.min(i, SPEEDS.length-1)]; colState.set(c,0); });
+
+  function updateParallax(){
+    const vh = innerHeight;
+    cols.forEach(col=>{
+      const speed = parseFloat(col.dataset.speed);
+      const rect  = col.getBoundingClientRect();
+      const dist  = rect.top + rect.height/2 - vh/2;
+      const target = -dist * speed;
+
+      const prev = colState.get(col) || 0;
+      const curr = prev + (target - prev) * SMOOTHING;  // inertia
+      col.style.transform = `translateY(${curr}px)`;
+      colState.set(col, curr);
+    });
+  }
+
+  function raf(t){ lenis.raf(t); updateParallax(); requestAnimationFrame(raf); }
+  requestAnimationFrame(raf);
+  addEventListener('resize', updateParallax);
+}
