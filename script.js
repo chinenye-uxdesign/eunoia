@@ -272,3 +272,4 @@ if (cols.length) {
   requestAnimationFrame(raf);
   addEventListener('resize', updateParallax);
 }
+ // Parallax by column End.
